@@ -1,0 +1,52 @@
+from kaggle.api.kaggle_api_extended import KaggleApi
+import os
+import time
+
+#zoek uit welke dataset je wilt ophalen
+def search_datasets(api,auth):
+# dataset_list(sort_by=None, size=None, file_type=None, license_name=None, tag_ids=None, search=None, user=None, mine=False, page=1, max_size=None, min_size=None)
+     datasets=api.dataset_list(search='youtube',license_name='cc', file_type='json')
+     for dat in  datasets:
+          print(dat.ref,dat.viewCount,dat.voteCount,sep=',')
+
+#download dataset
+def download_files(api,auth):
+     try:
+          api.dataset_download_files('rsrishav/youtube-trending-video-dataset', path='C:/Users/judit/OneDrive/Documenten/dailyupdate_yt_dataset/')
+     except:
+          print(Exception)
+     finally:
+          print('bestand is succesvol gedownload!')
+
+#verander elke keer de datasetnaam. eerste zipfile is 10000_ddmmyyy, tweede is 10001_ddmmyyy, derde is 10002_ddmmyyy enz...
+def change_filename():
+     f = open("youtube-trending-video-dataset.zip", "a")
+     path = 'C:/Users/judit/OneDrive/Documenten/dailyupdate_yt_dataset/'
+     count = 10000
+
+     for root, dirs, files in os.walk(path):
+          for i in files:
+                    os.rename(os.path.join(root, i), os.path.join(root, str(count) + ".zip"))
+                    f.write(root + "/" + i + "\t" + str(count) + ".zip" + "\n")
+                    count += 1
+          f.close()
+          print('het bestand is succesvol hernoemd!')
+
+     my_dir = r'C:/Users/judit/OneDrive/Documenten/dailyupdate_yt_dataset/'
+     current_time = time.strftime("%m%d%Y")
+
+     for dirpath, dnames, fnames in os.walk(my_dir):
+          for file in fnames:
+               if file.endswith(".zip"):
+                    name, ext = os.path.splitext(file)
+                    new_file_name = "{}{}{}".format(name, '_', current_time, ext)
+                    os.rename(os.path.join(dirpath, file), os.path.join(dirpath, new_file_name))
+
+
+if __name__ == '__main__':
+# authenticate API user
+     api = KaggleApi()
+     auth = api.authenticate()
+
+download_files(api, auth)
+change_filename()
